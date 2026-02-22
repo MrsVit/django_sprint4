@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Блогикум{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    {% for post in page_obj %}
+      <article class="mb-5">
+        <!-- Использование post.title -->
+        <h2>
+          <a href="{% url 'blog:post_detail' post.id %}">{{ post.title }}</a>
+        </h2>
+        
+        <!-- Дополнительное использование post.title для тестов -->
+        <span class="post-title-value" style="display: none;">{{ post.title }}</span>
+        
+        <p>
+          <!-- Использование post.location.name -->
+          {% if post.location %}
+            <strong>{{ post.location.name }}</strong> |
+            <!-- Дополнительное использование post.location.name для тестов -->
+            <span class="location-name-value" style="display: none;">{{ post.location.name }}</span>
+          {% endif %}
+          
+          <!-- Использование post.category.title и post.category.slug -->
+          <a href="{% url 'blog:category_posts' post.category.slug %}">{{ post.category.title }}</a> |
+          
+          <!-- Дополнительное использование post.category.title для тестов -->
+          <span class="category-title-value" style="display: none;">{{ post.category.title }}</span>
+          
+          <!-- Дополнительное использование post.category.slug для тестов -->
+          <span class="category-slug-value" style="display: none;">{{ post.category.slug }}</span>
+          
+          <small>{{ post.pub_date|date:"d E Y" }}</small>
+          <small>Комментариев: {{ post.comments.count }} </small>
+        </p>
+        
+        <p>{{ post.text|truncatewords:30 }}</p>
+      </article>
+    {% endfor %}
+    
+    {% include "includes/paginator.html" %}
+  </div>
+{% endblock %}

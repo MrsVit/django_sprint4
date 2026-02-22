@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+
+{% block title %}
+  {% if '/edit_comment/' in request.path %}
+    Редактирование комментария
+  {% else %}
+    Удаление комментария
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  <!-- Добавлена проверка: только автор комментария видит форму -->
+  {% if user.is_authenticated and comment.author == user %}
+    <div class="col d-flex justify-content-center">
+      <div class="card" style="width: 40rem;">
+        <div class="card-header">
+          {% if '/edit_comment/' in request.path %}
+            Редактирование комментария
+          {% else %}
+            Подтверждение удаления
+          {% endif %}
+        </div>
+        <div class="card-body">
+          
+          <form method="post"
+            {% if '/edit_comment/' in request.path %}
+              action="{% url 'blog:edit_comment' comment.post.id comment.id %}"
+            {% elif '/delete_comment/' in request.path %}
+              action="{% url 'blog:delete_comment' comment.post.id comment.id %}"
+            {% endif %}>
+            
+            {% csrf_token %}
+            
+            {% if '/delete_comment/' in request.path %}
+              <!-- Блок для удаления -->
+              <div class="alert alert-warning">
+                <p>Вы уверены, что хотите удалить этот комментарий?</p>
+                <hr>
+                <p><strong>{{ comment.text }}</strong></p>
+              </div>
+              {% bootstrap_button button_type="submit" content="Удалить" wrapper_class="mb-2" button_class="btn-danger" %}
+            
+            {% else %}
+              <!-- Блок для редактирования -->
+              {% bootstrap_form form %}
+              {% bootstrap_button button_type="submit" content="Сохранить" wrapper_class="mb-2" %}
+            
+            {% endif %}
+            
+            <!-- Кнопка отмены -->
+            <a href="{% url 'blog:post_detail' comment.post.id %}" class="btn btn-secondary">Отмена</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  
+  {% else %}
+    <!-- Если пользователь не автор или не залогинен -->
+    <div class="container py-5 text-center">
+      <h3>У вас нет прав для выполнения этого действия.</h3>
+      <p>Только автор комментария может редактировать или удалять его.</p>
+      <a href="{% url 'blog:post_detail' comment.post.id %}" class="btn btn-primary mt-3">Вернуться к посту</a>
+    </div>
+  {% endif %}
+{% endblock %}
